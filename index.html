@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nipuni - 3.0 Powered</title>
+    <title>Nipuni - Anti-Block AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -36,10 +36,12 @@
         #message-input { flex: 1; border: none; background: transparent; padding: 10px 0; outline: none; color: #333; }
         .icon-btn { color: #1d3557; font-size: 22px; border: none; background: none; cursor: pointer; }
 
-        /* Lock Screen */
+        /* Status & Lock */
         .lock-msg { text-align: center; width: 100%; margin-top: 10px; }
         .lock-content { background: #e57373; color: white; padding: 15px; border-radius: 15px; display: inline-block; width: 85%; }
         .unlock-btn { background: white; color: #e57373; padding: 8px 20px; border-radius: 20px; font-weight: bold; margin-top: 10px; width: 100%; border: none; cursor: pointer; }
+        
+        #status-text { font-size: 11px; color: #ff5722; font-weight: bold; margin-left: 10px; display: none; }
     </style>
 </head>
 <body>
@@ -48,7 +50,7 @@
         
         <div id="welcome-overlay">
             <h1 style="font-family: 'Pacifico'; color: #1d3557; font-size: 45px; margin-bottom: 10px;">Nipuni AI 🌸</h1>
-            <p style="color: #666; font-size: 12px;">Powered by Gemini 3.0</p>
+            <p style="color: #666; font-size: 12px;">Auto-Wait System Enabled</p>
             <button class="start-btn" onclick="startNipuni()">Chat පටන් ගමු! 🌸</button>
         </div>
 
@@ -66,8 +68,11 @@
         
         <div class="chat-input-container">
             <button class="icon-btn" onclick="alert('Type emoji manually! 😉')"><i class="fas fa-face-smile"></i></button>
-            <div class="input-wrapper">
-                <input type="text" id="message-input" placeholder="Ahanna deyak..." disabled>
+            <div style="flex:1;">
+                <div class="input-wrapper">
+                    <input type="text" id="message-input" placeholder="Ahanna deyak..." disabled>
+                </div>
+                <div id="status-text"></div>
             </div>
             <button class="icon-btn" id="send-btn" onclick="sendMessage()" disabled><i class="fas fa-paper-plane"></i></button>
         </div>
@@ -75,24 +80,20 @@
 
     <script>
         // *******************************************************************
-        // 🛠️ APPROVED MODELS ONLY (FROM YOUR LIST)
+        // 🛠️ SMART COOL-DOWN CONFIGURATION
         // *******************************************************************
         let SECURE_KEY = "";
         const ADS_LINK = "https://otieu.com/4/10358055"; 
         
-        // 🔥 ONLY USING MODELS FROM YOUR SUCCESS LIST
-        const MODELS = [
-            "gemini-3-flash-preview", 
-            "gemini-2.5-flash",
-            "gemini-2.0-flash-exp"
-        ];
+        // 🔥 PRIORITY: 2.0 (Best) -> 2.5 (Backup)
+        const MODELS = ["gemini-2.0-flash-exp", "gemini-2.5-flash"];
         
         let chatHistory = [];
         let msgCount = 0;
         let isLocked = false;
 
         function startNipuni() {
-            // 🔥 KEY SPLITTING (NEW KEY: AIzaSyCcNwvV5ba3EgKn7_RpKiGbRDBPhBoPloY)
+            // 🔥 KEY SPLITTING (Your Key: AIzaSyCcNwvV5ba3EgKn7_RpKiGbRDBPhBoPloY)
             const p1 = "AIzaSyCcNwvV";
             const p2 = "5ba3EgKn7_Rp";
             const p3 = "KiGbRDBPhBo";
@@ -146,45 +147,72 @@
 
             chatHistory.push({ role: "user", parts: [{ text: text }] });
 
-            // 🔥 LOGIC: Loop through ONLY supported models
-            let success = false;
+            // Try Models with Wait-Logic
+            await trySendingWithDelay(0);
+        }
+
+        // Recursive function to handle "Busy" state
+        async function trySendingWithDelay(modelIndex) {
+            const statusDiv = document.getElementById('status-text');
             
-            for (const model of MODELS) {
-                if (success) break;
-                // console.log("Trying:", model); // Debugging
-                try {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${SECURE_KEY}`;
-                    
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: chatHistory })
-                    });
-
-                    const data = await response.json();
-                    
-                    if (response.ok && data.candidates) {
-                        const reply = data.candidates[0].content.parts[0].text;
-                        addMessage(reply, false);
-                        chatHistory.push({ role: "model", parts: [{ text: reply }] });
-                        success = true;
-                    } else {
-                        // If model fails (e.g. 404/429), just continue loop
-                        console.warn(`Model ${model} unavailable/busy.`);
-                    }
-                } catch (e) {
-                    console.warn(`Network error with ${model}.`);
-                }
-            }
-
-            if (!success) {
-                addMessage("Aiyo, mata dan uththara denna ba (Network busy). Tikakin try karanna. 😥", false);
+            // If all models failed
+            if (modelIndex >= MODELS.length) {
+                addMessage("Aiyo, Google server full busy. Winadiyak indala try karanna. 😥", false);
                 chatHistory.pop();
+                resetInput();
+                return;
             }
 
+            const currentModel = MODELS[modelIndex];
+            
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${SECURE_KEY}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: chatHistory })
+                });
+
+                // 🔥 HANDLE BUSY / RATE LIMIT (429)
+                if (response.status === 429 || response.status === 503) {
+                    statusDiv.style.display = "block";
+                    statusDiv.innerText = "Network busy... Waiting 5s... ⏳";
+                    console.log("Rate Limited. Waiting 5s...");
+                    
+                    // Wait 5 seconds and retry SAME model
+                    await new Promise(r => setTimeout(r, 5000));
+                    statusDiv.innerText = "Retrying...";
+                    await trySendingWithDelay(modelIndex); // Retry same model
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error("Model Error");
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates) {
+                    const reply = data.candidates[0].content.parts[0].text;
+                    addMessage(reply, false);
+                    chatHistory.push({ role: "model", parts: [{ text: reply }] });
+                    statusDiv.style.display = "none";
+                    resetInput();
+                }
+
+            } catch (e) {
+                console.warn(`${currentModel} failed. Switching...`);
+                // Try NEXT model immediately
+                await trySendingWithDelay(modelIndex + 1);
+            }
+        }
+
+        function resetInput() {
             if (!isLocked) {
-                input.disabled = false;
-                input.focus();
+                document.getElementById('message-input').disabled = false;
+                document.getElementById('message-input').focus();
+                document.getElementById('status-text').style.display = "none";
             }
         }
 
