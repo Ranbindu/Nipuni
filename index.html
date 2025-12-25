@@ -3,25 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nipuni - 3.0 Powered AI</title>
+    <title>Nipuni - Debug Mode</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         /* --- Styles --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #a8dadc 0%, #457b9d 100%); height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        
         .chat-container { width: 420px; height: 85vh; background: rgba(255,255,255,0.95); border-radius: 25px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        
-        /* Overlay */
         #welcome-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.99); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .start-btn { background: linear-gradient(90deg, #1d3557 0%, #457b9d 100%); color: white; border: none; padding: 15px 40px; font-size: 20px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 20px; box-shadow: 0 5px 15px rgba(29, 53, 87, 0.4); }
-
-        /* Header */
+        .start-btn { background: linear-gradient(90deg, #1d3557 0%, #457b9d 100%); color: white; border: none; padding: 15px 40px; font-size: 20px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 20px; }
         .chat-header { padding: 15px 20px; background: linear-gradient(90deg, #1d3557 0%, #457b9d 100%); color: white; display: flex; justify-content: space-between; align-items: center; }
         .profile-pic { width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, 0.4); display: flex; justify-content: center; align-items: center; margin-right: 15px; border: 2px solid white; font-size: 24px; color: #ff5757; }
-
-        /* Messages */
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; background-color: #f1f8e9; }
         .message { margin-bottom: 20px; display: flex; flex-direction: column; }
         .message.sent { align-items: flex-end; }
@@ -29,26 +22,18 @@
         .message-content { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 14px; }
         .message.sent .message-content { background: linear-gradient(145deg, #457b9d 0%, #1d3557 100%); color: white; }
         .message.received .message-content { background: white; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-
-        /* Input */
         .chat-input-container { padding: 15px; background: white; border-top: 1px solid #eee; display: flex; align-items: center; }
         .input-wrapper { flex: 1; display: flex; background: #e0f2f1; border-radius: 30px; padding: 5px 15px; margin: 0 10px; }
         #message-input { flex: 1; border: none; background: transparent; padding: 10px 0; outline: none; color: #333; }
         .icon-btn { color: #1d3557; font-size: 22px; border: none; background: none; cursor: pointer; }
-
-        /* Lock Screen */
-        .lock-msg { text-align: center; width: 100%; margin-top: 10px; }
-        .lock-content { background: #e57373; color: white; padding: 15px; border-radius: 15px; display: inline-block; width: 85%; }
-        .unlock-btn { background: white; color: #e57373; padding: 8px 20px; border-radius: 20px; font-weight: bold; margin-top: 10px; width: 100%; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="chat-container">
-        
         <div id="welcome-overlay">
             <h1 style="font-family: 'Pacifico'; color: #1d3557; font-size: 45px; margin-bottom: 10px;">Nipuni AI 🌸</h1>
-            <p style="color: #666; font-size: 12px;">Powered by Gemini 3.0 & 2.5</p>
+            <p style="color: #666; font-size: 12px;">Diagnostics Mode</p>
             <button class="start-btn" onclick="startNipuni()">Chat පටන් ගමු! 🌸</button>
         </div>
 
@@ -75,30 +60,22 @@
 
     <script>
         // *******************************************************************
-        // 🛠️ HIGH PERFORMANCE CONFIGURATION (3.0 / 2.5 / 2.0)
+        // 🛠️ DEBUG CONFIGURATION
         // *******************************************************************
         let SECURE_KEY = "";
-        const ADS_LINK = "https://otieu.com/4/10358055"; 
         
-        // 🔥 PRIORITY LIST: Using ONLY what works for you
-        const MODELS = [
-            "gemini-3-flash-preview", 
-            "gemini-2.5-flash",
-            "gemini-2.0-flash-exp"
-        ];
+        // We will try 2.0 Flash Exp first (since you liked it)
+        // If it fails, it will SHOW YOU THE ERROR.
+        const MODEL = "gemini-2.0-flash-exp"; 
         
         let chatHistory = [];
-        let msgCount = 0;
-        let isLocked = false;
 
         function startNipuni() {
-            // 🔥 KEY SPLITTING (4 Parts) - YOUR NEW KEY
             // Key: AIzaSyDQQh-vVO0IrXJth7CILBgHfnFvlr6UZjA
             const p1 = "AIzaSyDQQh-v";
             const p2 = "VO0IrXJth7";
             const p3 = "CILBgHfnF";
             const p4 = "vlr6UZjA";
-            
             SECURE_KEY = p1 + p2 + p3 + p4;
 
             document.getElementById('welcome-overlay').style.display = 'none';
@@ -108,7 +85,6 @@
             const welcomeMsg = "Oyaa mona paththē kenekda? Nikan lassana adahsak wage namata! Mata kiyanna puluwan Nipuni kiyala. Horowpothana. 😌";
             addMessage(welcomeMsg, false);
 
-            // Persona Injection
             chatHistory = [
                 {
                     role: "user",
@@ -122,7 +98,6 @@
         }
 
         async function sendMessage() {
-            if (isLocked) return;
             const input = document.getElementById('message-input');
             const text = input.value.trim();
             if (!text) return;
@@ -131,61 +106,38 @@
             input.value = '';
             input.disabled = true;
 
-            // Ads
-            msgCount++;
-            if (msgCount >= 6) {
-                isLocked = true;
-                setTimeout(() => {
-                    const lockDiv = document.createElement('div');
-                    lockDiv.className = 'lock-msg';
-                    lockDiv.innerHTML = `<div class="lock-content"><p>⚠️ <b>Limit Reached</b><br>Reconnect to continue.</p><button class="unlock-btn" onclick="unlock()">🔄 Reconnect</button></div>`;
-                    document.getElementById('chat-messages').appendChild(lockDiv);
-                    document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-                }, 600);
-                return;
-            }
-
             chatHistory.push({ role: "user", parts: [{ text: text }] });
 
-            // 🔥 ROBUST RETRY LOGIC (Cycling through 3.0 -> 2.5 -> 2.0)
-            let success = false;
-            
-            for (const model of MODELS) {
-                if (success) break;
-                // console.log("Trying:", model); // For debugging
-                try {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${SECURE_KEY}`;
-                    
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: chatHistory })
-                    });
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${SECURE_KEY}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: chatHistory })
+                });
 
-                    // If API is Busy/Error, throw error to try next model
-                    if (!response.ok) {
-                        throw new Error("Model Failed");
-                    }
+                const data = await response.json();
 
-                    const data = await response.json();
-                    
-                    if (data.candidates) {
-                        const reply = data.candidates[0].content.parts[0].text;
-                        addMessage(reply, false);
-                        chatHistory.push({ role: "model", parts: [{ text: reply }] });
-                        success = true;
-                    }
-                } catch (e) {
-                    console.warn(`Model ${model} failed, switching to backup...`);
+                // 🔥 CRITICAL: CHECK FOR ERRORS
+                if (!response.ok) {
+                    const errorMsg = data.error ? data.error.message : "Unknown Error";
+                    // Alert the EXACT error to the user
+                    alert("⚠️ GOOGLE ERROR:\n" + errorMsg);
+                    throw new Error(errorMsg);
                 }
-            }
 
-            if (!success) {
-                addMessage("Aiyo, network busy wage. Tikakin try karanna. 😥", false);
+                if (data.candidates) {
+                    const reply = data.candidates[0].content.parts[0].text;
+                    addMessage(reply, false);
+                    chatHistory.push({ role: "model", parts: [{ text: reply }] });
+                }
+
+            } catch (error) {
+                console.error(error);
+                addMessage("❌ Error: " + error.message, false);
                 chatHistory.pop();
-            }
-
-            if (!isLocked) {
+            } finally {
                 input.disabled = false;
                 input.focus();
             }
@@ -198,19 +150,6 @@
             const container = document.getElementById('chat-messages');
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
-        }
-
-        window.unlock = function() {
-            window.open(ADS_LINK, '_blank');
-            const btn = document.querySelector('.unlock-btn');
-            btn.innerText = "Connecting...";
-            setTimeout(() => {
-                isLocked = false;
-                msgCount = 0;
-                document.querySelector('.lock-msg').remove();
-                document.getElementById('message-input').disabled = false;
-                addMessage("Hari, mama aava! 🌸", false);
-            }, 4000);
         }
 
         document.getElementById('message-input').addEventListener('keypress', (e) => e.key === 'Enter' && sendMessage());
