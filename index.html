@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nipuni - Secure AI</title>
+    <title>Nipuni - 3.0 Powered AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -48,7 +48,7 @@
         
         <div id="welcome-overlay">
             <h1 style="font-family: 'Pacifico'; color: #1d3557; font-size: 45px; margin-bottom: 10px;">Nipuni AI 🌸</h1>
-            <p style="color: #666; font-size: 12px;">Secure 4-Layer Encryption</p>
+            <p style="color: #666; font-size: 12px;">Powered by Gemini 3.0 & 2.5</p>
             <button class="start-btn" onclick="startNipuni()">Chat පටන් ගමු! 🌸</button>
         </div>
 
@@ -75,16 +75,16 @@
 
     <script>
         // *******************************************************************
-        // 🛠️ ULTRA SECURE CONFIGURATION
+        // 🛠️ HIGH PERFORMANCE CONFIGURATION (3.0 / 2.5 / 2.0)
         // *******************************************************************
         let SECURE_KEY = "";
         const ADS_LINK = "https://otieu.com/4/10358055"; 
         
-        // 🔥 PRIORITY LIST: Try 3.0 first, then 2.5, then 2.0
+        // 🔥 PRIORITY LIST: Using ONLY what works for you
         const MODELS = [
             "gemini-3-flash-preview", 
-            "gemini-2.5-flash", 
-            "gemini-2.0-flash"
+            "gemini-2.5-flash",
+            "gemini-2.0-flash-exp"
         ];
         
         let chatHistory = [];
@@ -92,7 +92,7 @@
         let isLocked = false;
 
         function startNipuni() {
-            // 🔥 KEY SPLITTING (4 Parts - Ultra Secure)
+            // 🔥 KEY SPLITTING (4 Parts) - YOUR NEW KEY
             // Key: AIzaSyDQQh-vVO0IrXJth7CILBgHfnFvlr6UZjA
             const p1 = "AIzaSyDQQh-v";
             const p2 = "VO0IrXJth7";
@@ -147,12 +147,12 @@
 
             chatHistory.push({ role: "user", parts: [{ text: text }] });
 
-            // 🔥 INTELLIGENT MODEL SWITCHING
+            // 🔥 ROBUST RETRY LOGIC (Cycling through 3.0 -> 2.5 -> 2.0)
             let success = false;
             
             for (const model of MODELS) {
                 if (success) break;
-                console.log("Trying Model:", model);
+                // console.log("Trying:", model); // For debugging
                 try {
                     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${SECURE_KEY}`;
                     
@@ -162,9 +162,14 @@
                         body: JSON.stringify({ contents: chatHistory })
                     });
 
+                    // If API is Busy/Error, throw error to try next model
+                    if (!response.ok) {
+                        throw new Error("Model Failed");
+                    }
+
                     const data = await response.json();
                     
-                    if (response.ok && data.candidates) {
+                    if (data.candidates) {
                         const reply = data.candidates[0].content.parts[0].text;
                         addMessage(reply, false);
                         chatHistory.push({ role: "model", parts: [{ text: reply }] });
