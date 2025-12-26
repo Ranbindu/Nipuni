@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nipuni - Fresh Key 2.0</title>
+    <title>Nipuni - 2.5 Flash Power</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -49,7 +49,7 @@
     <div class="chat-container">
         <div id="welcome-overlay">
             <h1 style="font-family: 'Pacifico'; color: #1d3557; font-size: 45px; margin-bottom: 10px;">Nipuni AI 🌸</h1>
-            <p style="color: #666; font-size: 12px;">Fresh Key System</p>
+            <p style="color: #666; font-size: 12px;">Powered by Gemini 2.5 Flash</p>
             <button class="start-btn" onclick="startNipuni()">Chat පටන් ගමු! 🌸</button>
         </div>
 
@@ -79,13 +79,13 @@
 
     <script>
         // *******************************************************************
-        // 🛠️ FRESH KEY CONFIGURATION (2.0 ONLY)
+        // 🛠️ 2.5 FLASH CONFIGURATION
         // *******************************************************************
         let SECURE_KEY = "";
         const ADS_LINK = "https://otieu.com/4/10358055"; 
         
-        // 🔥 PRIORITY: 2.0 (Best) -> 2.5 (Backup)
-        const MODELS = ["gemini-2.0-flash", "gemini-2.5-flash"];
+        // 🔥 PRIORITY: 2.5 Flash (Main) -> 2.0 Flash (Backup)
+        const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
         
         let chatHistory = [];
         let msgCount = 0;
@@ -111,7 +111,7 @@
             chatHistory = [
                 {
                     role: "user",
-                    parts: [{ text: "Act as Nipuni. 18yo, Horowpothana. Village girl, sensitive, searching for first love. Reply short & sweet in Sinhala/Singlish. Use emojis. Never say you are an AI." }]
+                    parts: [{ text: "Act as Nipuni. 18yo, Horowpothana. Village girl, slightly fierce but sensitive. Searching for first love. Reply short & sweet in Sinhala/Singlish. Use emojis. Never say you are an AI." }]
                 },
                 {
                     role: "model",
@@ -146,7 +146,7 @@
 
             chatHistory.push({ role: "user", parts: [{ text: text }] });
 
-            // Start Request
+            // Start Request with 2.5 Priority
             await tryModelsRecursive(0);
         }
 
