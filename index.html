@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nipuni - Anti-Block AI</title>
+    <title>Nipuni - 2.0 Final Version</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -36,21 +36,20 @@
         #message-input { flex: 1; border: none; background: transparent; padding: 10px 0; outline: none; color: #333; }
         .icon-btn { color: #1d3557; font-size: 22px; border: none; background: none; cursor: pointer; }
 
-        /* Status & Lock */
+        /* Lock & Status */
         .lock-msg { text-align: center; width: 100%; margin-top: 10px; }
         .lock-content { background: #e57373; color: white; padding: 15px; border-radius: 15px; display: inline-block; width: 85%; }
         .unlock-btn { background: white; color: #e57373; padding: 8px 20px; border-radius: 20px; font-weight: bold; margin-top: 10px; width: 100%; border: none; cursor: pointer; }
         
-        #status-text { font-size: 11px; color: #ff5722; font-weight: bold; margin-left: 10px; display: none; }
+        #status-bar { font-size: 11px; color: #457b9d; margin-top: 5px; text-align: center; display: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="chat-container">
-        
         <div id="welcome-overlay">
             <h1 style="font-family: 'Pacifico'; color: #1d3557; font-size: 45px; margin-bottom: 10px;">Nipuni AI 🌸</h1>
-            <p style="color: #666; font-size: 12px;">Auto-Wait System Enabled</p>
+            <p style="color: #666; font-size: 12px;">Gemini 2.0 Exclusive</p>
             <button class="start-btn" onclick="startNipuni()">Chat පටන් ගමු! 🌸</button>
         </div>
 
@@ -72,7 +71,7 @@
                 <div class="input-wrapper">
                     <input type="text" id="message-input" placeholder="Ahanna deyak..." disabled>
                 </div>
-                <div id="status-text"></div>
+                <div id="status-bar">Connecting...</div>
             </div>
             <button class="icon-btn" id="send-btn" onclick="sendMessage()" disabled><i class="fas fa-paper-plane"></i></button>
         </div>
@@ -80,20 +79,20 @@
 
     <script>
         // *******************************************************************
-        // 🛠️ SMART COOL-DOWN CONFIGURATION
+        // 🛠️ FINAL WORKING CONFIGURATION (NO 1.5)
         // *******************************************************************
         let SECURE_KEY = "";
         const ADS_LINK = "https://otieu.com/4/10358055"; 
         
-        // 🔥 PRIORITY: 2.0 (Best) -> 2.5 (Backup)
-        const MODELS = ["gemini-2.0-flash-exp", "gemini-2.5-flash"];
+        // 🔥 ONLY 2.0 MODELS (NO 1.5 HERE)
+        const MODELS = ["gemini-2.0-flash", "gemini-2.0-flash-exp"];
         
         let chatHistory = [];
         let msgCount = 0;
         let isLocked = false;
 
         function startNipuni() {
-            // 🔥 KEY SPLITTING (Your Key: AIzaSyCcNwvV5ba3EgKn7_RpKiGbRDBPhBoPloY)
+            // 🔥 KEY SPLITTING (New Key: AIzaSyCcNwvV5ba3EgKn7_RpKiGbRDBPhBoPloY)
             const p1 = "AIzaSyCcNwvV";
             const p2 = "5ba3EgKn7_Rp";
             const p3 = "KiGbRDBPhBo";
@@ -112,7 +111,7 @@
             chatHistory = [
                 {
                     role: "user",
-                    parts: [{ text: "Act as Nipuni. 18yo, Horowpothana. Village girl, slightly fierce but sensitive. Searching for first love. Reply short & sweet in Sinhala/Singlish. Use emojis. Never say you are an AI." }]
+                    parts: [{ text: "Act as Nipuni. 18yo, Horowpothana. Village girl, sensitive, searching for first love. Reply short & sweet in Sinhala/Singlish. Use emojis. Never say you are an AI." }]
                 },
                 {
                     role: "model",
@@ -147,24 +146,26 @@
 
             chatHistory.push({ role: "user", parts: [{ text: text }] });
 
-            // Try Models with Wait-Logic
-            await trySendingWithDelay(0);
+            // Start Request
+            await tryModelsRecursive(0);
         }
 
-        // Recursive function to handle "Busy" state
-        async function trySendingWithDelay(modelIndex) {
-            const statusDiv = document.getElementById('status-text');
+        async function tryModelsRecursive(index) {
+            const statusBar = document.getElementById('status-bar');
             
-            // If all models failed
-            if (modelIndex >= MODELS.length) {
-                addMessage("Aiyo, Google server full busy. Winadiyak indala try karanna. 😥", false);
+            if (index >= MODELS.length) {
+                // All failed
+                statusBar.style.display = "none";
+                addMessage("Aiyo, mata dan uththara denna ba (Network busy). Winadiyak indala try karanna. 😥", false);
                 chatHistory.pop();
                 resetInput();
                 return;
             }
 
-            const currentModel = MODELS[modelIndex];
-            
+            const currentModel = MODELS[index];
+            statusBar.style.display = "block";
+            statusBar.innerText = "Nipuni is typing... 🌸";
+
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${SECURE_KEY}`;
                 
@@ -174,22 +175,15 @@
                     body: JSON.stringify({ contents: chatHistory })
                 });
 
-                // 🔥 HANDLE BUSY / RATE LIMIT (429)
+                // Handle Quota/Busy
                 if (response.status === 429 || response.status === 503) {
-                    statusDiv.style.display = "block";
-                    statusDiv.innerText = "Network busy... Waiting 5s... ⏳";
-                    console.log("Rate Limited. Waiting 5s...");
-                    
-                    // Wait 5 seconds and retry SAME model
-                    await new Promise(r => setTimeout(r, 5000));
-                    statusDiv.innerText = "Retrying...";
-                    await trySendingWithDelay(modelIndex); // Retry same model
+                    statusBar.innerText = "Network busy... Waiting 5s... ⏳";
+                    await new Promise(r => setTimeout(r, 5000)); // Wait 5s
+                    await tryModelsRecursive(index); // Retry same model
                     return;
                 }
 
-                if (!response.ok) {
-                    throw new Error("Model Error");
-                }
+                if (!response.ok) throw new Error("API Error");
 
                 const data = await response.json();
                 
@@ -197,14 +191,15 @@
                     const reply = data.candidates[0].content.parts[0].text;
                     addMessage(reply, false);
                     chatHistory.push({ role: "model", parts: [{ text: reply }] });
-                    statusDiv.style.display = "none";
+                    statusBar.style.display = "none";
                     resetInput();
+                } else {
+                    throw new Error("No content");
                 }
 
             } catch (e) {
                 console.warn(`${currentModel} failed. Switching...`);
-                // Try NEXT model immediately
-                await trySendingWithDelay(modelIndex + 1);
+                await tryModelsRecursive(index + 1); // Try next model
             }
         }
 
@@ -212,7 +207,6 @@
             if (!isLocked) {
                 document.getElementById('message-input').disabled = false;
                 document.getElementById('message-input').focus();
-                document.getElementById('status-text').style.display = "none";
             }
         }
 
