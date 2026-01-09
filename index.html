@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nipuni 2.5 Ultimate 🌸</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #fdf0f4; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .chat-container { width: 430px; height: 95vh; background: white; border-radius: 30px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        .header { background: #ff4d6d; color: white; padding: 18px; text-align: center; font-weight: 600; font-size: 1.2rem; }
+        #messages { flex: 1; padding: 20px; overflow-y: auto; background: #fffcfd; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 14.5px; line-height: 1.5; }
+        .received { background: #f1f3f4; align-self: flex-start; color: #333; }
+        .sent { background: #ff4d6d; color: white; align-self: flex-end; }
+        .input-area { padding: 15px; border-top: 1px solid #eee; display: flex; background: white; align-items: center; }
+        #userInput { flex: 1; border: none; background: #f8f9fa; padding: 12px 20px; border-radius: 30px; outline: none; }
+        #sendBtn { background: #ff4d6d; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; margin-left: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .typing { font-size: 11px; color: #ff4d6d; padding: 5px 25px; font-style: italic; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="header">Nipuni v57 (2.5 Flash) 🌸</div>
+    <div id="messages"></div>
+    <div id="typingIndicator" class="typing">Nipuni is typing... ❤️</div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Katha karanna patiyo..." autocomplete="off">
+        <button id="sendBtn" onclick="handleSend()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<script>
+    const keys = [
+        "AIzaSyCVKBIVJlN_Yfb1qGc9KAjOteBqTUNr-M8",
+        "AIzaSyBSF3av6fPpbH_IETewPNDm2ZPta9rfld4",
+        "AIzaSyBYhR4hyKYnLw_bUbOBDyCHXsP80fA_8MY",
+        "AIzaSyDPHfogwS6DolXuQov2KE3xU_y-xQRua7Q",
+        "AIzaSyDu2l7BCXjuHokZzj23qReW8PL3oGBQGlQ",
+        "AIzaSyChTmNKOPC33VwuwwT386cimUJfpzP2Ywg",
+        "AIzaSyA6Bac0VtfWpQnbkSS0yN4JkCCgGY9IdHc"
+    ];
+    let keyIdx = 0;
+
+    const SYS = "Roleplay as Nipuni, an 18yo village girl. Talk ONLY in Singlish. No markdown. Be romantic.";
+
+    // 🛡️ CORS Proxy ලැයිස්තුව (එකක් වැඩ නැත්නම් අනිකට යනවා)
+    const proxies = [
+        "https://api.allorigins.win/raw?url=",
+        "https://corsproxy.io/?",
+        "https://thingproxy.freeboard.io/fetch/"
+    ];
+    let proxyIdx = 0;
+
+    async function getNipuniReply(val, retryCount = 0) {
+        if (retryCount >= keys.length) return null;
+
+        const currentKey = keys[keyIdx];
+        const currentProxy = proxies[proxyIdx];
+        
+        // 🚀 Gemini 2.5 Flash Experimental URL
+        const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-exp:generateContent?key=${currentKey}`;
+        
+        // Proxy එක හරහා යවන URL එක
+        const finalUrl = currentProxy + encodeURIComponent(targetUrl);
+
+        try {
+            const res = await fetch(finalUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ role: "user", parts: [{ text: SYS + "\n\nUser: " + val }] }]
+                })
+            });
+
+            const data = await res.json();
+            if (data.candidates) return data.candidates[0].content.parts[0].text;
+            
+            throw new Error("Failed");
+        } catch (err) {
+            console.warn("Proxy or Key failed, rotating...");
+            keyIdx = (keyIdx + 1) % keys.length;
+            proxyIdx = (proxyIdx + 1) % proxies.length;
+            return getNipuniReply(val, retryCount + 1);
+        }
+    }
+
+    async function handleSend() {
+        const input = document.getElementById('userInput');
+        const val = input.value.trim();
+        if(!val) return;
+
+        addMessage(val, 'sent');
+        input.value = "";
+        document.getElementById('typingIndicator').style.display = 'block';
+
+        const reply = await getNipuniReply(val);
+        document.getElementById('typingIndicator').style.display = 'none';
+
+        if (reply) {
+            addMessage(reply.replace(/[\*\_\#]/g, '').trim(), 'received');
+        } else {
+            addMessage("Aney katha karanna baha wage patiyo..", 'received');
+        }
+    }
+
+    function addMessage(t, type) {
+        const box = document.getElementById('messages');
+        const d = document.createElement('div');
+        d.className = 'msg ' + type;
+        d.innerText = t;
+        box.appendChild(d);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    document.getElementById('userInput').addEventListener('keypress', e => { if(e.key === 'Enter') handleSend(); });
+</script>
+</body>
+</html>
