@@ -11,11 +11,11 @@
         .chat-container { width: 100%; max-width: 430px; height: 95vh; background: white; border-radius: 30px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
         .header { background: #ff4d6d; color: white; padding: 20px; text-align: center; font-weight: 600; font-size: 1.2rem; }
         #messages { flex: 1; padding: 20px; overflow-y: auto; background: #fffcfd; display: flex; flex-direction: column; gap: 12px; }
-        .msg { max-width: 80%; padding: 12px 18px; border-radius: 20px; font-size: 15px; line-height: 1.5; }
-        .received { background: #f1f3f4; align-self: flex-start; color: #333; }
-        .sent { background: #ff4d6d; color: white; align-self: flex-end; }
+        .msg { max-width: 80%; padding: 12px 18px; border-radius: 20px; font-size: 15px; line-height: 1.5; word-wrap: break-word; }
+        .received { background: #f1f3f4; align-self: flex-start; color: #333; border-bottom-left-radius: 5px; }
+        .sent { background: #ff4d6d; color: white; align-self: flex-end; border-bottom-right-radius: 5px; }
         
-        /* 🛑 Network Error Overlay */
+        /* 🛑 Network Error Layer */
         #errorOverlay {
             display: none;
             position: absolute;
@@ -25,15 +25,15 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
             padding: 30px;
+            text-align: center;
         }
-        .error-icon { font-size: 4rem; color: #ccc; margin-bottom: 20px; }
         .reconnect-btn {
             background: #4285f4; color: white; padding: 12px 25px;
-            text-decoration: none; border-radius: 5px; font-weight: bold;
-            margin-top: 20px; border: none; cursor: pointer; font-size: 15px;
+            border: none; border-radius: 5px; font-weight: bold;
+            margin-top: 20px; cursor: pointer; font-size: 15px;
         }
+        
         .input-area { padding: 15px; border-top: 1px solid #eee; display: flex; background: white; align-items: center; gap: 10px; }
         #userInput { flex: 1; border: none; background: #f8f9fa; padding: 12px 20px; border-radius: 30px; outline: none; }
         #sendBtn { background: #ff4d6d; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
@@ -46,16 +46,18 @@
     <div class="header">Nipuni v57 💖</div>
     
     <div id="errorOverlay">
-        <div class="error-icon"><i class="fas fa-wifi-slash"></i></div>
-        <h3 style="color: #444;">Connection Error</h3>
-        <p style="color: #777; margin-top: 10px; font-size: 14px;">A network error occurred. Please reconnect to continue chatting with Nipuni.</p>
-        <button onclick="redirectToAd()" class="reconnect-btn">Reconnect Network</button>
+        <i class="fas fa-wifi-slash" style="font-size: 4rem; color: #ccc;"></i>
+        <h3 style="margin-top: 20px; color: #444;">Connection Error</h3>
+        <p style="color: #777; font-size: 14px; margin-top: 10px;">A network error occurred. Please reconnect to continue chatting with Nipuni.</p>
+        <button onclick="handleReconnect()" class="reconnect-btn">Reconnect Network</button>
     </div>
 
     <div id="messages">
         <div class="msg received">Aney patiyo katha karannako... 😘</div>
     </div>
+    
     <div id="typingIndicator" class="typing">Nipuni hithanawa... ❤️</div>
+    
     <div class="input-area" id="inputBox">
         <input type="text" id="userInput" placeholder="Moniwa hari kiyanna..." autocomplete="off">
         <button id="sendBtn" onclick="handleSend()"><i class="fas fa-paper-plane"></i></button>
@@ -63,16 +65,17 @@
 </div>
 
 <script>
+    // Config
     const WORKER_URL = "https://aged-sunset-9bb9.ranbindua.workers.dev";
     const AD_LINK = "https://otieu.com/4/10358055";
     
-    // කලින් මැසේජ් කීයක් යැව්වද කියලා check කිරීම
-    let messageCount = parseInt(localStorage.getItem('msg_count')) || 0;
-    let isUnlocked = localStorage.getItem('chat_unlocked') === 'true';
+    // Counter & Lock Logic
+    let msgCount = parseInt(localStorage.getItem('nipuni_count')) || 0;
+    let isUnlocked = localStorage.getItem('nipuni_unlocked') === 'true';
 
-    // Page එක load වෙද්දීම කලින්ම lock වෙලාද බලන්න
-    window.onload = function() {
-        if (messageCount >= 5 && !isUnlocked) {
+    // Check on Load
+    window.onload = () => {
+        if (msgCount >= 5 && !isUnlocked) {
             showError();
         }
     };
@@ -82,11 +85,13 @@
         document.getElementById('userInput').disabled = true;
     }
 
-    function redirectToAd() {
-        // User ලින්ක් එකට ගියා කියලා mark කරමු
-        localStorage.setItem('chat_unlocked', 'true');
-        // Ad ලින්ක් එකට යැවීම
-        window.location.href = AD_LINK;
+    function handleReconnect() {
+        // Unlock chat for this session
+        localStorage.setItem('nipuni_unlocked', 'true');
+        // Open Ad Link
+        window.open(AD_LINK, '_blank');
+        // Reload to resume chat
+        location.reload();
     }
 
     async function handleSend() {
@@ -94,8 +99,8 @@
         const text = input.value.trim();
         if (!text) return;
 
-        // මැසේජ් 5 පරීක්ෂාව (Unlock වෙලා නැත්නම් විතරයි)
-        if (messageCount >= 5 && !isUnlocked) {
+        // Message limit check
+        if (msgCount >= 5 && !isUnlocked) {
             showError();
             return;
         }
@@ -103,32 +108,37 @@
         addMessage(text, 'sent');
         input.value = "";
         
-        messageCount++;
-        localStorage.setItem('msg_count', messageCount);
+        msgCount++;
+        localStorage.setItem('nipuni_count', msgCount);
 
-        document.getElementById('typingIndicator').style.display = 'block';
+        const typing = document.getElementById('typingIndicator');
+        typing.style.display = 'block';
 
         try {
-            const response = await fetch(WORKER_URL, {
+            const res = await fetch(WORKER_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: text })
             });
-            const data = await response.json();
-            document.getElementById('typingIndicator').style.display = 'none';
             
+            const data = await res.json();
+            typing.style.display = 'none';
+
             if (data.reply) {
                 addMessage(data.reply.replace(/[\*\_\#]/g, '').trim(), 'received');
+            } else {
+                addMessage("Aney mata therenne na patiyo..", 'received');
             }
 
-            // මැසේජ් එක ලැබුණාට පස්සේ counter එක බලලා lock කිරීම
-            if (messageCount >= 5 && !isUnlocked) {
-                setTimeout(showError, 1000);
+            // Lock after 5 messages
+            if (msgCount >= 5 && !isUnlocked) {
+                setTimeout(showError, 1500);
             }
 
         } catch (err) {
-            document.getElementById('typingIndicator').style.display = 'none';
+            typing.style.display = 'none';
             addMessage("Network upset wage patiyo..", 'received');
+            console.error(err);
         }
     }
 
